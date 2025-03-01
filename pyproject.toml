@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi (>=0.115.10,<0.116.0)",
-    "python-decouple (>=3.8,<4.0)"
+    "python-decouple (>=3.8,<4.0)",
+    "numpy (>=2.2.3,<3.0.0)"
 ]
 
 

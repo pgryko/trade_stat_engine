@@ -45,3 +45,17 @@ Your service must support two HTTP-based API endpoints communicating via JSON:
   - 💡 No two concurrent add or/and get requests will occur simultaneously within a given symbol.
   - The time complexity for calculating stats should be better than O(n). O(n) complexity is insufficient for this task.
   - It is ok to use code generation tools like Copilot or ChatGPT, etc.
+
+This implementation:
+
+Uses a segment tree data structure that achieves O(log n) time complexity for range queries (min, max, sum, sum of squares)
+Rebuilds the segment tree lazily only when needed (when stats are requested and new data has been added)
+Maintains a cache of computed statistics to avoid redundant calculations
+Includes proper validation for input parameters
+Enforces the limit of 10 unique symbols
+
+The segment tree is particularly well-suited for this problem because:
+
+It efficiently handles range queries in O(log n) time
+It can be updated lazily to optimize performance
+It can compute all the required statistics (min, max, avg, var) efficiently
