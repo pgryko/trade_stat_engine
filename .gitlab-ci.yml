@@ -1,0 +1,28 @@
+image: python:3.11-slim
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  POETRY_HOME: "$CI_PROJECT_DIR/.poetry"
+  POETRY_VIRTUALENVS_IN_PROJECT: "true"
+  POETRY_VERSION: "1.8.1"  # Specify a fixed version for stability
+
+cache:
+  key:
+    files:
+      - poetry.lock
+  paths:
+    - .pip-cache/
+    - .venv/
+    - .poetry/
+
+before_script:
+  - python -V
+  - pip install -U pip
+  - pip install poetry==${POETRY_VERSION}
+  - poetry --version
+  - poetry config virtualenvs.in-project true
+
+test:
+  script:
+    - poetry install --no-interaction --with dev
+    - poetry run pytest
