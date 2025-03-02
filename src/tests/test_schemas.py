@@ -25,12 +25,15 @@ class TestModels:
     def test_batch_request_empty_values(self):
         with pytest.raises(ValidationError) as excinfo:
             BatchRequest(symbol="AAPL", values=[])
-        assert "min_items" in str(excinfo.value).lower()
+        assert "at least 1 item after validation" in str(excinfo.value).lower()
 
     def test_batch_request_too_many_values(self):
         with pytest.raises(ValidationError) as excinfo:
             BatchRequest(symbol="AAPL", values=[1.0] * 10001)
-        assert "max_items" in str(excinfo.value).lower()
+        assert (
+            "list should have at most 10000 items after validation"
+            in str(excinfo.value).lower()
+        )
 
     def test_stats_response(self):
         response = StatsResponse(min=1.0, max=5.0, last=5.0, avg=3.0, var=2.0)

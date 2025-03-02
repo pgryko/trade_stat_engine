@@ -47,7 +47,7 @@ class TestSegmentTree:
         assert tree.tree_max == []
         assert tree.tree_sum == []
         assert tree.tree_sum_sq == []
-        assert tree.is_dirty is False
+        assert tree.is_dirty is True
 
     def test_build_tree_non_empty(self):
         tree = SegmentTree()
@@ -143,6 +143,26 @@ class TestSymbolData:
         # Second call should use cache
         stats2 = symbol_data.get_stats(1)
         assert stats2 == stats1
+
+        symbol_data.add_batch(
+            [
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+                13.0,
+                14.0,
+                15.0,
+            ]
+        )
+
+        stats1 = symbol_data.get_stats(1)
+        assert stats1.min == 6.0
+        assert stats1.max == 15.0
+        assert len(symbol_data.stats_cache) == 1
 
         # Different k should calculate new stats
         stats3 = symbol_data.get_stats(2)
