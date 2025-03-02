@@ -8,6 +8,12 @@ from src.app import app, symbols_data
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def clear_symbols_data():
+    symbols_data.clear()
+    yield
+
+
 class TestAPI:
     def test_add_batch_success(self):
         response = client.post(
