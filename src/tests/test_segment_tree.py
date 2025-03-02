@@ -2,7 +2,6 @@ from collections import deque
 
 import numpy as np
 import pytest
-from fastapi import HTTPException
 
 from src.segment_tree import SegmentTree, SymbolData
 
@@ -175,10 +174,7 @@ class TestSymbolData:
 
     def test_get_stats_no_data(self):
         symbol_data = SymbolData()
-        with pytest.raises(HTTPException) as excinfo:
-            symbol_data.get_stats(1)
-        assert excinfo.value.status_code == 404
-        assert "No data available" in excinfo.value.detail
+        assert symbol_data.get_stats(1) is None
 
 
 class TestEdgeCases:

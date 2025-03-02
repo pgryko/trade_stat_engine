@@ -16,18 +16,17 @@ def create_app():
     async def add_batch(request: BatchRequest):
         symbol = request.symbol
         values = request.values
-        # Check number of symbols
-        if (
-            not await app.state.symbols_data.contains(symbol)
-            and await app.state.symbols_data.count() >= 10
-        ):
+
+        # Use atomic operation to check and add symbol
+        symbol_data, is_new = await app.state.symbols_data.check_and_add_symbol(
+            symbol, lambda: SymbolData()
+        )
+
+        if symbol_data is None:
             raise HTTPException(
                 status_code=400, detail="Maximum number of symbols (10) reached"
             )
-        symbol_data = await app.state.symbols_data.get(symbol)
-        if not symbol_data:
-            symbol_data = SymbolData()
-            await app.state.symbols_data.set(symbol, symbol_data)
+
         symbol_data.add_batch(values)
         return {
             "status": "success",
@@ -45,9 +44,17 @@ def create_app():
         """
         if k < 1 or k > 8:
             raise HTTPException(status_code=400, detail="k must be between 1 and 8")
+
         symbol_data = await app.state.symbols_data.get(symbol)
         if not symbol_data:
             raise HTTPException(status_code=404, detail="Symbol not found")
-        return symbol_data.get_stats(k)
+
+        stats = symbol_data.get_stats(k)
+        if not stats:
+            raise HTTPException(
+                status_code=404, detail="No data available for this symbol"
+            )
+
+        return stats
 
     return app
