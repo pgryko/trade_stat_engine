@@ -1,6 +1,6 @@
 # TradeStat Engine
 
-Overview
+## Overview
 
 A high-performance RESTful service capable of handling the rigorous demands of high-frequency trading systems. This service will act as a component in the company ABC trading infrastructure, managing and analysing financial data in near real-time.
 
