@@ -2,20 +2,21 @@ import pytest
 import math
 from httpx import AsyncClient, ASGITransport
 import pytest_asyncio
-from src.app import app, symbols_data
-
-# Create a test client
-# client = TestClient(app)
 
 
-@pytest.fixture(autouse=True)
-def clear_symbols_data():
-    symbols_data.clear()
-    yield
+@pytest.fixture
+async def test_app():
+    # Create fresh instances before each test
+    from src.app import create_app
+
+    app = create_app()
+    await app.state.symbols_data.clear()  # Ensure clean state
+    return app
 
 
 @pytest_asyncio.fixture
-async def async_client():
+async def async_client(test_app):
+    app = await test_app  # Await the test_app coroutine
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as client:
@@ -32,7 +33,8 @@ class TestAPI:
         data = response.json()
         assert data["status"] == "success"
         assert "Added 3 data points" in data["message"]
-        assert await symbols_data.contains("AAPL")
+        app = async_client._transport.app
+        assert await app.state.symbols_data.contains("AAPL")
 
     async def test_add_batch_invalid_symbol(self, async_client):
         response = await async_client.post(
