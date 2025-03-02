@@ -47,7 +47,7 @@ class TestSegmentTree:
         assert tree.tree_max == []
         assert tree.tree_sum == []
         assert tree.tree_sum_sq == []
-        assert tree.is_dirty is False
+        assert tree.is_dirty is True
 
     def test_build_tree_non_empty(self):
         tree = SegmentTree()
