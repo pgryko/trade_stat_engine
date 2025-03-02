@@ -150,6 +150,7 @@ class TestAPI:
 
 # Performance test for large datasets
 @pytest.mark.slow
+@pytest.mark.asyncio
 class TestPerformance:
     async def test_large_dataset(self, async_client):
         import time
