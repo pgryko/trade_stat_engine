@@ -9,7 +9,12 @@ class SymbolsStorage:
         self.lock = Lock()
 
     async def get(self, symbol):
-        return self.data.get(symbol)
+        # Acquire lock for consistent reads
+        await run_in_threadpool(self.lock.acquire)
+        try:
+            return self.data.get(symbol)
+        finally:
+            self.lock.release()
 
     async def set(self, symbol, value):
         # Acquire lock
@@ -20,10 +25,20 @@ class SymbolsStorage:
             self.lock.release()
 
     async def contains(self, symbol):
-        return symbol in self.data
+        # Acquire lock for consistent reads
+        await run_in_threadpool(self.lock.acquire)
+        try:
+            return symbol in self.data
+        finally:
+            self.lock.release()
 
     async def count(self):
-        return len(self.data)
+        # Acquire lock for consistent reads
+        await run_in_threadpool(self.lock.acquire)
+        try:
+            return len(self.data)
+        finally:
+            self.lock.release()
 
     async def clear(self):
         # Acquire lock

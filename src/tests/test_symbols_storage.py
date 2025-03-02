@@ -1,7 +1,10 @@
+import pytest
+
 from src.segment_tree import SymbolData
 from src.symbols_storage import SymbolsStorage
 
 
+@pytest.mark.asyncio
 async def test_clear_symbols():
     symbols_data = SymbolsStorage()
     # Add some data
