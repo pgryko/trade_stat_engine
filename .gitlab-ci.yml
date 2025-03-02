@@ -4,7 +4,7 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
   POETRY_HOME: "$CI_PROJECT_DIR/.poetry"
   POETRY_VIRTUALENVS_IN_PROJECT: "true"
-  POETRY_VERSION: "1.8.1"  # Specify a fixed version for stability
+  POETRY_VERSION: "2.1.1"
 
 cache:
   key:
@@ -24,5 +24,5 @@ before_script:
 
 test:
   script:
-    - poetry install --no-interaction --with dev
+    - poetry install --no-interaction --with dev --no-root
     - poetry run pytest

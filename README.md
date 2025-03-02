@@ -48,6 +48,8 @@ Your service must support two HTTP-based API endpoints communicating via JSON:
 
 This implementation:
 
+https://cp-algorithms.com/data_structures/segment_tree.html
+
 Uses a segment tree data structure that achieves O(log n) time complexity for range queries (min, max, sum, sum of squares)
 Rebuilds the segment tree lazily only when needed (when stats are requested and new data has been added)
 Maintains a cache of computed statistics to avoid redundant calculations
@@ -59,3 +61,27 @@ The segment tree is particularly well-suited for this problem because:
 It efficiently handles range queries in O(log n) time
 It can be updated lazily to optimize performance
 It can compute all the required statistics (min, max, avg, var) efficiently
+
+
+
+2. Build the image:
+```bash
+docker build -t hft-statistics-api .
+```
+
+3. Run the container:
+```bash
+docker run -d -p 8000:8000 hft-statistics-api
+```
+
+
+- Run tests:
+````bash
+docker run hft-statistics-api test
+````
+
+
+- Run tests with coverage:
+````bash
+docker run hft-statistics-api test-cov
+````

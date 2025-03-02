@@ -1,31 +1,10 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional
-from collections import deque
 import math
+from collections import deque
+from typing import List, Optional
 
-app = FastAPI(title="High-Frequency Trading Statistics API")
+from fastapi import HTTPException
 
-
-# Data models
-class BatchRequest(BaseModel):
-    symbol: str
-    values: List[float] = Field(..., min_items=1, max_items=10000)
-
-    @field_validator("symbol")
-    @classmethod
-    def symbol_must_be_valid(cls, v: str) -> str:
-        if not v or len(v) > 20:  # Arbitrary reasonable limit
-            raise ValueError("Symbol must be non-empty and not exceed 20 characters")
-        return v
-
-
-class StatsResponse(BaseModel):
-    min: float
-    max: float
-    last: float
-    avg: float
-    var: float
+from src.schemas import StatsResponse
 
 
 # Efficient data structure using segment tree for O(log n) statistical queries
@@ -137,7 +116,7 @@ class SegmentTree:
         # Partial overlap
         mid = (ss + se) // 2
         return self._query_sum(ss, mid, qs, qe, 2 * si + 1) + self._query_sum(
-            ss + 1, se, qs, qe, 2 * si + 2
+            mid + 1, se, qs, qe, 2 * si + 2
         )
 
     def _query_sum_sq(self, ss, se, qs, qe, si):
@@ -206,40 +185,3 @@ class SymbolData:
         self.stats_cache[k] = stats
 
         return stats
-
-
-# In-memory storage - limited to 10 symbols as per requirements
-symbols_data = {}
-
-
-@app.post("/add_batch/")
-async def add_batch(request: BatchRequest):
-    symbol = request.symbol
-    values = request.values
-
-    # Check number of symbols
-    if symbol not in symbols_data and len(symbols_data) >= 10:
-        raise HTTPException(
-            status_code=400, detail="Maximum number of symbols (10) reached"
-        )
-
-    if symbol not in symbols_data:
-        symbols_data[symbol] = SymbolData()
-
-    symbols_data[symbol].add_batch(values)
-
-    return {
-        "status": "success",
-        "message": f"Added {len(values)} data points for {symbol}",
-    }
-
-
-@app.get("/stats/")
-async def get_stats(symbol: str, k: int):
-    if k < 1 or k > 8:
-        raise HTTPException(status_code=400, detail="k must be between 1 and 8")
-
-    if symbol not in symbols_data:
-        raise HTTPException(status_code=404, detail="Symbol not found")
-
-    return symbols_data[symbol].get_stats(k)
