@@ -36,11 +36,18 @@ def create_app():
     @app.get("/stats/")
     async def get_stats(symbol: str, k: int):
         """
-        Get statistics for a symbol
+        Get statistics for a symbol.
 
-        Parameters:
-        - symbol: The trading symbol to get statistics for
-        - k: The window size for calculating statistics (1-8)
+                Parameters:
+            - symbol: str
+                The trading symbol to get statistics for
+            - k: int
+                The exponent used to determine data points for statistics calculation.
+                Number of points = min(10^k, total_points), where k is 1-8.
+                Examples:
+                    k=1: uses last 10 points
+                    k=2: uses last 100 points
+                    etc.
         """
         if k < 1 or k > 8:
             raise HTTPException(status_code=400, detail="k must be between 1 and 8")

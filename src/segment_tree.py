@@ -18,6 +18,9 @@ class SegmentTree:
         self.last_val = None
         self.is_dirty = True  # Flag to indicate if the tree needs to be rebuilt
 
+    # Rebulid the segment tree is an O(n) operation -  In a high-frequency trading context—where batches
+    # might be frequent and data volumes high—this could become a performance bottleneck.
+    # an incremental update mechanism could be more efficient or lazy update mechanism
     def _build_tree(self):
         n = len(self.buffer)
         if n == 0:
@@ -25,6 +28,7 @@ class SegmentTree:
             self.tree_max = []
             self.tree_sum = []
             self.tree_sum_sq = []
+            self.last_val = None
             return
 
         # Compute the size of the segment tree
@@ -156,6 +160,9 @@ class SegmentTree:
         # More numerically stable variance calculation
         # Using: Var(X) = E[X²] - E[X]²
         # Carefully ordered to minimize floating point errors
+        # not 100% sure about this computes a population variance
+        # to calculate sample variance, a different formula (dividing by
+        # n−1 instead of n) would be required
         if points_needed > 1:
             mean_of_squares = sum_sq_val / points_needed
             square_of_mean = avg_val * avg_val

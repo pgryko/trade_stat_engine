@@ -2,6 +2,7 @@ import asyncio
 
 
 class SymbolsStorage:
+    # Note: we could use finner grained locking, e.g. (per-symbol) to improve concurrency.
     def __init__(self):
         self.data = {}
         self.lock = asyncio.Lock()
