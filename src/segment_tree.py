@@ -2,7 +2,6 @@ import math
 from collections import deque
 from typing import List, Optional
 
-from fastapi import HTTPException
 
 from src.schemas import StatsResponse
 
@@ -153,7 +152,16 @@ class SegmentTree:
         sum_sq_val = self._query_sum_sq(0, n - 1, qs, qe, 0)
 
         avg_val = sum_val / points_needed
-        var_val = (sum_sq_val / points_needed) - (avg_val**2)
+
+        # More numerically stable variance calculation
+        # Using: Var(X) = E[X²] - E[X]²
+        # Carefully ordered to minimize floating point errors
+        if points_needed > 1:
+            mean_of_squares = sum_sq_val / points_needed
+            square_of_mean = avg_val * avg_val
+            var_val = max(0.0, mean_of_squares - square_of_mean)  # Ensure non-negative
+        else:
+            var_val = 0.0  # Variance of a single value is 0
 
         return StatsResponse(
             min=min_val, max=max_val, last=self.last_val, avg=avg_val, var=var_val
@@ -171,17 +179,14 @@ class SymbolData:
         # Clear the cache as it's no longer valid
         self.stats_cache = {}
 
-    def get_stats(self, k: int) -> StatsResponse:
+    def get_stats(self, k: int) -> Optional[StatsResponse]:
         if k in self.stats_cache:
             return self.stats_cache[k]
 
         stats = self.segment_tree.get_stats(k)
         if stats is None:
-            raise HTTPException(
-                status_code=404, detail="No data available for this symbol"
-            )
+            return None
 
         # Cache the results
         self.stats_cache[k] = stats
-
         return stats

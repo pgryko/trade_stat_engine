@@ -1,49 +1,50 @@
-from threading import Lock
-
-from starlette.concurrency import run_in_threadpool
+import asyncio
 
 
 class SymbolsStorage:
     def __init__(self):
         self.data = {}
-        self.lock = Lock()
+        self.lock = asyncio.Lock()
 
     async def get(self, symbol):
         # Acquire lock for consistent reads
-        await run_in_threadpool(self.lock.acquire)
-        try:
+        async with self.lock:
             return self.data.get(symbol)
-        finally:
-            self.lock.release()
 
     async def set(self, symbol, value):
-        # Acquire lock
-        await run_in_threadpool(self.lock.acquire)
-        try:
+        async with self.lock:
             self.data[symbol] = value
-        finally:
-            self.lock.release()
 
     async def contains(self, symbol):
-        # Acquire lock for consistent reads
-        await run_in_threadpool(self.lock.acquire)
-        try:
+        async with self.lock:
             return symbol in self.data
-        finally:
-            self.lock.release()
 
     async def count(self):
-        # Acquire lock for consistent reads
-        await run_in_threadpool(self.lock.acquire)
-        try:
+        async with self.lock:
             return len(self.data)
-        finally:
-            self.lock.release()
 
     async def clear(self):
-        # Acquire lock
-        await run_in_threadpool(self.lock.acquire)
-        try:
+        async with self.lock:
             self.data.clear()
-        finally:
-            self.lock.release()
+
+    async def check_and_add_symbol(self, symbol, create_value_fn):
+        """
+        Atomically check if adding a symbol would exceed limits,
+        and add it if allowed.
+
+        Returns: (symbol_data, is_new)
+        """
+        async with self.lock:
+            # Check if symbol exists
+            symbol_data = self.data.get(symbol)
+            if symbol_data:
+                return symbol_data, False
+
+            # Check symbol limit
+            if len(self.data) >= 10:
+                return None, False
+
+            # Add new symbol
+            symbol_data = create_value_fn()
+            self.data[symbol] = symbol_data
+            return symbol_data, True
